@@ -17,7 +17,6 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DuplicatesRouteImport } from './routes/duplicates'
 import { Route as MyProjectsRouteImport } from './routes/my-projects'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
-import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RoadmapRouteImport } from './routes/roadmap'
 import { Route as RoiRouteImport } from './routes/roi'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -65,11 +64,6 @@ const RecommendationsRoute = RecommendationsRouteImport.update({
   path: '/recommendations',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsRoute = ReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RoadmapRoute = RoadmapRouteImport.update({
   id: '/roadmap',
   path: '/roadmap',
@@ -110,7 +104,6 @@ export interface FileRoutesByFullPath {
   '/duplicates': typeof DuplicatesRoute
   '/my-projects': typeof MyProjectsRoute
   '/recommendations': typeof RecommendationsRoute
-  '/reports': typeof ReportsRoute
   '/roadmap': typeof RoadmapRoute
   '/roi': typeof RoiRoute
   '/services': typeof ServicesRoute
@@ -127,7 +120,6 @@ export interface FileRoutesByTo {
   '/duplicates': typeof DuplicatesRoute
   '/my-projects': typeof MyProjectsRoute
   '/recommendations': typeof RecommendationsRoute
-  '/reports': typeof ReportsRoute
   '/roadmap': typeof RoadmapRoute
   '/roi': typeof RoiRoute
   '/services': typeof ServicesRoute
@@ -145,7 +137,6 @@ export interface FileRoutesById {
   '/duplicates': typeof DuplicatesRoute
   '/my-projects': typeof MyProjectsRoute
   '/recommendations': typeof RecommendationsRoute
-  '/reports': typeof ReportsRoute
   '/roadmap': typeof RoadmapRoute
   '/roi': typeof RoiRoute
   '/services': typeof ServicesRoute
@@ -164,7 +155,6 @@ export interface FileRouteTypes {
     | '/duplicates'
     | '/my-projects'
     | '/recommendations'
-    | '/reports'
     | '/roadmap'
     | '/roi'
     | '/services'
@@ -181,7 +171,6 @@ export interface FileRouteTypes {
     | '/duplicates'
     | '/my-projects'
     | '/recommendations'
-    | '/reports'
     | '/roadmap'
     | '/roi'
     | '/services'
@@ -198,7 +187,6 @@ export interface FileRouteTypes {
     | '/duplicates'
     | '/my-projects'
     | '/recommendations'
-    | '/reports'
     | '/roadmap'
     | '/roi'
     | '/services'
@@ -216,7 +204,6 @@ export interface RootRouteChildren {
   DuplicatesRoute: typeof DuplicatesRoute
   MyProjectsRoute: typeof MyProjectsRoute
   RecommendationsRoute: typeof RecommendationsRoute
-  ReportsRoute: typeof ReportsRoute
   RoadmapRoute: typeof RoadmapRoute
   RoiRoute: typeof RoiRoute
   ServicesRoute: typeof ServicesRoute
@@ -283,13 +270,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecommendationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reports': {
-      id: '/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/roadmap': {
       id: '/roadmap'
       path: '/roadmap'
@@ -344,7 +324,6 @@ const rootRouteChildren: RootRouteChildren = {
   DuplicatesRoute: DuplicatesRoute,
   MyProjectsRoute: MyProjectsRoute,
   RecommendationsRoute: RecommendationsRoute,
-  ReportsRoute: ReportsRoute,
   RoadmapRoute: RoadmapRoute,
   RoiRoute: RoiRoute,
   ServicesRoute: ServicesRoute,

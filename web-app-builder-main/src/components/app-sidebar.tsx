@@ -7,7 +7,6 @@ import {
   Sparkles,
   Network,
   Lightbulb,
-  FileBarChart,
   Settings,
   ChevronDown,
   Users,
@@ -25,6 +24,22 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import authUsers from "../../auth-users.json";
+
+type AuthUsers = {
+  admin: {
+    emailId: string;
+    password: string;
+    userName: string;
+  };
+  users: Array<{
+    emailId: string;
+    password: string;
+    userName: string;
+  }>;
+};
+
+const credentials = authUsers as AuthUsers;
 
 const baseItems = [
   { title: "My Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -33,7 +48,6 @@ const baseItems = [
   { title: "AI Insights", url: "/ai-insights", icon: Sparkles },
   { title: "Architecture", url: "/architecture", icon: Network },
   { title: "Recommendations", url: "/recommendations", icon: Lightbulb },
-  { title: "Reports", url: "/reports", icon: FileBarChart },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -46,10 +60,38 @@ export function AppSidebar() {
   const currentPath = useRouterState({ select: (r) => r.location.pathname });
   const isActive = (path: string) => currentPath === path;
   const [isAdmin, setIsAdmin] = useState(false);
+  const [displayName, setDisplayName] = useState("User");
+  const [displayRole, setDisplayRole] = useState("User");
+  const [initials, setInitials] = useState("U");
+
+  const toInitials = (name: string) => {
+    const parts = name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    return parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "").join("") || "U";
+  };
 
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
+    const userId = localStorage.getItem("userId")?.toLowerCase() ?? "";
+    const userName = localStorage.getItem("userName") ?? "";
+
     setIsAdmin(userRole === "admin");
+
+    if (userRole === "admin") {
+      const name = userName || credentials.admin.userName;
+      setDisplayName(name);
+      setDisplayRole("Admin");
+      setInitials(toInitials(name));
+      return;
+    }
+
+    const matchedUser = credentials.users.find((user) => user.emailId.toLowerCase() === userId);
+    const name = userName || matchedUser?.userName || "User";
+    setDisplayName(name);
+    setDisplayRole("User");
+    setInitials(toInitials(name));
   }, []);
 
   const items = isAdmin ? [...baseItems, ...adminItems] : baseItems;
@@ -99,11 +141,11 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-3">
         <div className="flex items-center gap-2.5 rounded-lg p-1.5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">
-            RP
+            {initials}
           </div>
           <div className="flex flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-medium">Rajendra Pawar</span>
-            <span className="text-[11px] text-muted-foreground">Enterprise Architect</span>
+            <span className="text-sm font-medium">{displayName}</span>
+            <span className="text-[11px] text-muted-foreground">{displayRole}</span>
           </div>
           <ChevronDown className="h-4 w-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
         </div>

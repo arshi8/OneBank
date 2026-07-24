@@ -1,10 +1,53 @@
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Bell, HelpCircle, Search } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Input } from "@/components/ui/input";
+import authUsers from "../../auth-users.json";
+
+type AuthUsers = {
+  admin: {
+    emailId: string;
+    password: string;
+    userName: string;
+  };
+  users: Array<{
+    emailId: string;
+    password: string;
+    userName: string;
+  }>;
+};
+
+const credentials = authUsers as AuthUsers;
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const [initials, setInitials] = useState("U");
+
+  useEffect(() => {
+    const userRole = localStorage.getItem("userRole");
+    const userId = localStorage.getItem("userId")?.toLowerCase() ?? "";
+    const userNameFromStorage = localStorage.getItem("userName") ?? "";
+
+    const getInitials = (name: string) => {
+      const parts = name
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+      return parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "").join("") || "U";
+    };
+
+    if (userRole === "admin") {
+      const adminName = userNameFromStorage || credentials.admin.userName;
+      setInitials(getInitials(adminName));
+      return;
+    }
+
+    const matchedUser = credentials.users.find((user) => user.emailId.toLowerCase() === userId);
+    const userName = userNameFromStorage || matchedUser?.userName || "User";
+    setInitials(getInitials(userName));
+  }, []);
+
   return (
     <SidebarProvider>
       <div className="dark flex min-h-screen w-full bg-background text-foreground">
@@ -28,7 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
               </button>
               <div className="h-9 w-9 rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground flex items-center justify-center">
-                RP
+                {initials}
               </div>
             </div>
           </header>
