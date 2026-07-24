@@ -1,11 +1,23 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Circle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import uploadVisual from "@/assets/login-visual.jpg";
+import { getDefaultRouteForRole, getStoredUserRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/upload-progress")({
+  beforeLoad: () => {
+    const role = getStoredUserRole();
+
+    if (role === "admin") {
+      throw redirect({ to: "/applications" });
+    }
+
+    if (!role) {
+      throw redirect({ to: "/" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Upload Progress — OneBank Platform" },
@@ -55,9 +67,9 @@ function UploadProgressPage() {
 
       return () => clearTimeout(timer);
     } else if (currentStep === steps.length) {
-      // Redirect to dashboard after all steps complete
+      // Redirect to the correct landing page after all steps complete
       const timer = setTimeout(() => {
-        navigate({ to: "/dashboard" });
+        navigate({ to: getDefaultRouteForRole(getStoredUserRole()) });
       }, 1000);
 
       return () => clearTimeout(timer);
