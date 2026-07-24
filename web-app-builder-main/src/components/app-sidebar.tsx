@@ -1,0 +1,113 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import {
+  LayoutDashboard,
+  Upload,
+  FolderOpen,
+  Sparkles,
+  Network,
+  Lightbulb,
+  FileBarChart,
+  Settings,
+  ChevronDown,
+  Users,
+  Lock,
+} from "lucide-react";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+
+const baseItems = [
+  { title: "My Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Upload Project", url: "/upload-project", icon: Upload },
+  { title: "My Projects", url: "/my-projects", icon: FolderOpen },
+  { title: "AI Insights", url: "/ai-insights", icon: Sparkles },
+  { title: "Architecture", url: "/architecture", icon: Network },
+  { title: "Recommendations", url: "/recommendations", icon: Lightbulb },
+  { title: "Reports", url: "/reports", icon: FileBarChart },
+  { title: "Settings", url: "/settings", icon: Settings },
+];
+
+const adminItems = [
+  { title: "User Management", url: "/admin/users", icon: Users },
+  { title: "System Configuration", url: "/admin/config", icon: Lock },
+];
+
+export function AppSidebar() {
+  const currentPath = useRouterState({ select: (r) => r.location.pathname });
+  const isActive = (path: string) => currentPath === path;
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const userRole = localStorage.getItem("userRole");
+    setIsAdmin(userRole === "admin");
+  }, []);
+
+  const items = isAdmin ? [...baseItems, ...adminItems] : baseItems;
+
+  return (
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
+        <Link to="/dashboard" className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
+            <span className="text-sm font-bold text-primary-foreground">OB</span>
+          </div>
+          <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
+            <span className="text-base font-semibold tracking-tight">
+              One<span className="text-primary">Bank</span>
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Platform
+            </span>
+          </div>
+        </Link>
+      </SidebarHeader>
+
+      <SidebarContent className="px-2 py-3">
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                    className="h-10 data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-glow"
+                  >
+                    <Link to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border p-3">
+        <div className="flex items-center gap-2.5 rounded-lg p-1.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">
+            RP
+          </div>
+          <div className="flex flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
+            <span className="text-sm font-medium">Rajendra Pawar</span>
+            <span className="text-[11px] text-muted-foreground">Enterprise Architect</span>
+          </div>
+          <ChevronDown className="h-4 w-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
