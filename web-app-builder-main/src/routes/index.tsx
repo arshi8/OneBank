@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import loginVisual from "@/assets/login-visual.jpg";
+import authUsers from "../../auth-users.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,15 +34,71 @@ const perks = [
   { icon: TrendingDown, text: "Save costs and accelerate delivery" },
 ];
 
+type LoginRole = "user" | "admin";
+
+type AuthUsers = {
+  admin: {
+    emailId: string;
+    password: string;
+    userName: string;
+  };
+  users: Array<{
+    emailId: string;
+    password: string;
+    userName: string;
+  }>;
+};
+
+const credentials = authUsers as AuthUsers;
+
+function validateCredentials(role: LoginRole, userId: string, password: string): boolean {
+  const normalizedUserId = userId.trim().toLowerCase();
+  const normalizedPassword = password.trim();
+
+  if (role === "admin") {
+    return (
+      credentials.admin.emailId.toLowerCase() === normalizedUserId &&
+      credentials.admin.password === normalizedPassword
+    );
+  }
+
+  return credentials.users.some(
+    (user) => user.emailId.toLowerCase() === normalizedUserId && user.password === normalizedPassword,
+  );
+}
+
+function getSignedInUserName(role: LoginRole, userId: string): string {
+  const normalizedUserId = userId.trim().toLowerCase();
+
+  if (role === "admin") {
+    return credentials.admin.userName;
+  }
+
+  const matchedUser = credentials.users.find((user) => user.emailId.toLowerCase() === normalizedUserId);
+  return matchedUser?.userName ?? "";
+}
+
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [loginType, setLoginType] = useState<"user" | "admin">("user");
+  const [loginType, setLoginType] = useState<LoginRole>("user");
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Store login type in localStorage
+
+    const validLogin = validateCredentials(loginType, userId, password);
+    if (!validLogin) {
+      setAuthError("Invalid credentials for selected login type.");
+      return;
+    }
+
+    setAuthError("");
     localStorage.setItem("userRole", loginType);
+    localStorage.setItem("userId", userId.trim().toLowerCase());
+    localStorage.setItem("userName", getSignedInUserName(loginType, userId));
     navigate({ to: "/dashboard" });
   };
 
@@ -128,9 +186,27 @@ function LoginPage() {
               className="mt-8 space-y-4"
               onSubmit={handleSubmit}
             >
+              {authError ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{authError}</AlertDescription>
+                </Alert>
+              ) : null}
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email / Username</Label>
-                <Input id="email" type="text" placeholder="Enter your email or username" className="h-11" />
+                <Input
+                  id="email"
+                  type="text"
+                  placeholder="Enter your email or username"
+                  className="h-11"
+                  value={userId}
+                  onChange={(e) => {
+                    setUserId(e.target.value);
+                    if (authError) {
+                      setAuthError("");
+                    }
+                  }}
+                  required
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="password">Password</Label>
@@ -140,6 +216,14 @@ function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     className="h-11 pr-10"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (authError) {
+                        setAuthError("");
+                      }
+                    }}
+                    required
                   />
                   <button
                     type="button"

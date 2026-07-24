@@ -1,0 +1,19 @@
+{
+  "admin": {
+    "emailId": "neha.miglani@db.com",
+    "password": "admin@123",
+    "userName": "Neha Miglani"
+  },
+  "users": [
+    {
+      "emailId": "samrithi-reddy.bomma@db.com",
+      "password": "user@123",
+      "userName": "Samrithi Reddy"
+    },
+    {
+      "emailId": "bhavesh.lokre@db.com",
+      "password": "user@123",
+      "userName": "Bhavesh Lokre"
+    }
+  ]
+}
