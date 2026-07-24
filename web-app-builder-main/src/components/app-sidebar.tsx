@@ -42,6 +42,7 @@ type AuthUsers = {
 const credentials = authUsers as AuthUsers;
 
 const userItems = [
+  { title: "My Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
   { title: "Upload Project", url: "/upload-project", icon: Upload },
   { title: "My Projects", url: "/my-projects", icon: FolderOpen },
   { title: "Reusable Finder", url: "/reusable-components", icon: Puzzle },
@@ -65,7 +66,7 @@ export function AppSidebar() {
   const [displayName, setDisplayName] = useState("User");
   const [displayRole, setDisplayRole] = useState("User");
   const [initials, setInitials] = useState("U");
-  const [homeUrl, setHomeUrl] = useState<"/" | "/dashboard" | "/my-projects">("/");
+  const [homeUrl, setHomeUrl] = useState<"/" | "/dashboard" | "/user-dashboard">("/");
 
   const toInitials = (name: string) => {
     const parts = name

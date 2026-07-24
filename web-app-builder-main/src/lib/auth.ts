@@ -9,13 +9,13 @@ export function getStoredUserRole(): UserRole | null {
   return role === "admin" || role === "user" ? role : null;
 }
 
-export function getDefaultRouteForRole(role: UserRole | null): "/dashboard" | "/my-projects" | "/" {
+export function getDefaultRouteForRole(role: UserRole | null): "/dashboard" | "/user-dashboard" | "/" {
   if (role === "admin") {
     return "/dashboard";
   }
 
   if (role === "user") {
-    return "/my-projects";
+    return "/user-dashboard";
   }
 
   return "/";
