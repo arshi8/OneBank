@@ -14,14 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getStoredUserRole } from "@/lib/auth";
+import { getDefaultRouteForRole, getStoredUserRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/applications")({
   beforeLoad: () => {
     const role = getStoredUserRole();
 
     if (role !== "admin") {
-      throw redirect({ to: role === "user" ? "/my-projects" : "/" });
+      throw redirect({ to: getDefaultRouteForRole(role) });
     }
   },
   head: () => ({

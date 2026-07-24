@@ -24,6 +24,7 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as UploadProgressRouteImport } from './routes/upload-progress'
 import { Route as UploadProjectRouteImport } from './routes/upload-project'
+import { Route as UserDashboardRouteImport } from './routes/user-dashboard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -100,6 +101,11 @@ const UploadProjectRoute = UploadProjectRouteImport.update({
   path: '/upload-project',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserDashboardRoute = UserDashboardRouteImport.update({
+  id: '/user-dashboard',
+  path: '/user-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/upload-progress': typeof UploadProgressRoute
   '/upload-project': typeof UploadProjectRoute
+  '/user-dashboard': typeof UserDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/upload-progress': typeof UploadProgressRoute
   '/upload-project': typeof UploadProjectRoute
+  '/user-dashboard': typeof UserDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/upload-progress': typeof UploadProgressRoute
   '/upload-project': typeof UploadProjectRoute
+  '/user-dashboard': typeof UserDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/upload-progress'
     | '/upload-project'
+    | '/user-dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/upload-progress'
     | '/upload-project'
+    | '/user-dashboard'
   id:
     | '__root__'
     | '/'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/upload-progress'
     | '/upload-project'
+    | '/user-dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   UploadProgressRoute: typeof UploadProgressRoute
   UploadProjectRoute: typeof UploadProjectRoute
+  UserDashboardRoute: typeof UserDashboardRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UploadProjectRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/user-dashboard': {
+      id: '/user-dashboard'
+      path: '/user-dashboard'
+      fullPath: '/user-dashboard'
+      preLoaderRoute: typeof UserDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -351,6 +371,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   UploadProgressRoute: UploadProgressRoute,
   UploadProjectRoute: UploadProjectRoute,
+  UserDashboardRoute: UserDashboardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
