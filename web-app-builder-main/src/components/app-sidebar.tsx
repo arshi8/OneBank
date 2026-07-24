@@ -5,8 +5,8 @@ import {
   Upload,
   FolderOpen,
   Sparkles,
+  Puzzle,
   Network,
-  Lightbulb,
   Settings,
   ChevronDown,
   Users,
@@ -44,9 +44,9 @@ const credentials = authUsers as AuthUsers;
 const userItems = [
   { title: "Upload Project", url: "/upload-project", icon: Upload },
   { title: "My Projects", url: "/my-projects", icon: FolderOpen },
+  { title: "Reusable Finder", url: "/reusable-components", icon: Puzzle },
   { title: "AI Insights", url: "/ai-insights", icon: Sparkles },
   { title: "Architecture", url: "/architecture", icon: Network },
-  { title: "Recommendations", url: "/recommendations", icon: Lightbulb },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -55,7 +55,6 @@ const adminItems = [
   { title: "All Applications", url: "/applications", icon: Users },
   { title: "AI Insights", url: "/ai-insights", icon: Sparkles },
   { title: "Architecture", url: "/architecture", icon: Network },
-  { title: "Recommendations", url: "/recommendations", icon: Lightbulb },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
