@@ -38,11 +38,11 @@ const perks = [
 type LoginRole = "user" | "admin";
 
 type AuthUsers = {
-  admin: {
+  admin: Array<{
     emailId: string;
     password: string;
     userName: string;
-  };
+  }>;
   users: Array<{
     emailId: string;
     password: string;
@@ -57,9 +57,8 @@ function validateCredentials(role: LoginRole, userId: string, password: string):
   const normalizedPassword = password.trim();
 
   if (role === "admin") {
-    return (
-      credentials.admin.emailId.toLowerCase() === normalizedUserId &&
-      credentials.admin.password === normalizedPassword
+    return credentials.admin.some(
+      (user) => user.emailId.toLowerCase() === normalizedUserId && user.password === normalizedPassword
     );
   }
 
@@ -72,7 +71,8 @@ function getSignedInUserName(role: LoginRole, userId: string): string {
   const normalizedUserId = userId.trim().toLowerCase();
 
   if (role === "admin") {
-    return credentials.admin.userName;
+    const matchedAdmin = credentials.admin.find((user) => user.emailId.toLowerCase() === normalizedUserId);
+    return matchedAdmin?.userName ?? "Admin";
   }
 
   const matchedUser = credentials.users.find((user) => user.emailId.toLowerCase() === normalizedUserId);

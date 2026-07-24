@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
@@ -10,7 +10,10 @@ import {
   Settings,
   ChevronDown,
   Users,
+  LogOut
 } from "lucide-react";
+
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import {
   Sidebar,
@@ -27,11 +30,11 @@ import { getDefaultRouteForRole, getStoredUserRole } from "@/lib/auth";
 import authUsers from "../../auth-users.json";
 
 type AuthUsers = {
-  admin: {
+  admin: Array<{
     emailId: string;
     password: string;
     userName: string;
-  };
+  }>;
   users: Array<{
     emailId: string;
     password: string;
@@ -42,24 +45,26 @@ type AuthUsers = {
 const credentials = authUsers as AuthUsers;
 
 const userItems = [
-  { title: "Upload Project", url: "/upload-project", icon: Upload },
+  { title: "User Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Submit New Application", url: "/upload-project", icon: Upload },
   { title: "My Projects", url: "/my-projects", icon: FolderOpen },
-  { title: "AI Insights", url: "/ai-insights", icon: Sparkles },
+  { title: "AI Analysis Report", url: "/ai-insights", icon: Sparkles },
   { title: "Architecture", url: "/architecture", icon: Network },
-  { title: "Recommendations", url: "/recommendations", icon: Lightbulb },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 const adminItems = [
-  { title: "My Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "All Applications", url: "/applications", icon: Users },
-  { title: "AI Insights", url: "/ai-insights", icon: Sparkles },
+  { title: "Admin Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Application Catalog", url: "/applications", icon: Users },
+  { title: "Enterprise Analytics", url: "/roi", icon: Network },
+  { title: "Review AI Suggestions", url: "/ai-insights", icon: Sparkles },
+  { title: "Approve Reusable Services", url: "/services", icon: Lightbulb },
   { title: "Architecture", url: "/architecture", icon: Network },
-  { title: "Recommendations", url: "/recommendations", icon: Lightbulb },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
+  const navigate = useNavigate();
   const currentPath = useRouterState({ select: (r) => r.location.pathname });
   const isActive = (path: string) => currentPath === path;
   const [isAdmin, setIsAdmin] = useState(false);
@@ -85,7 +90,8 @@ export function AppSidebar() {
     setHomeUrl(getDefaultRouteForRole(userRole));
 
     if (userRole === "admin") {
-      const name = userName || credentials.admin.userName;
+      const matchedAdmin = credentials.admin.find((user) => user.emailId.toLowerCase() === userId);
+      const name = userName || matchedAdmin?.userName || "Admin";
       setDisplayName(name);
       setDisplayRole("Admin");
       setInitials(toInitials(name));
@@ -98,6 +104,13 @@ export function AppSidebar() {
     setDisplayRole("User");
     setInitials(toInitials(name));
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
+    navigate({ to: "/", replace: true });
+  };
 
   const items = isAdmin ? adminItems : userItems;
 
@@ -144,16 +157,25 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-3">
-        <div className="flex items-center gap-2.5 rounded-lg p-1.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">
-            {initials}
-          </div>
-          <div className="flex flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-medium">{displayName}</span>
-            <span className="text-[11px] text-muted-foreground">{displayRole}</span>
-          </div>
-          <ChevronDown className="h-4 w-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex items-center gap-2.5 rounded-lg p-1.5 cursor-pointer transition-colors hover:bg-muted/50">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">
+                {initials}
+              </div>
+              <div className="flex flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
+                <span className="text-sm font-medium">{displayName}</span>
+                <span className="text-[11px] text-muted-foreground">{displayRole}</span>
+              </div>
+              <ChevronDown className="h-4 w-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56 mb-2 ml-2">
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" /> Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
   );

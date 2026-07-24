@@ -1,9 +1,16 @@
 {
-  "admin": {
-    "emailId": "neha.miglani@db.com",
-    "password": "admin@123",
-    "userName": "Neha Miglani"
-  },
+  "admin": [
+    {
+      "emailId": "neha.miglani@db.com",
+      "password": "admin@123",
+      "userName": "Neha Miglani"
+    },
+    {
+      "emailId": "admin",
+      "password": "admin@123",
+      "userName": "Admin"
+    }
+  ],
   "users": [
     {
       "emailId": "samrithi-reddy.bomma@db.com",
@@ -14,6 +21,11 @@
       "emailId": "bhavesh.lokre@db.com",
       "password": "user@123",
       "userName": "Bhavesh Lokre"
+    },
+    {
+      "emailId": "arshi.jindani@db.com",
+      "password": "user@123",
+      "userName": "Arshi Jindani"
     }
   ]
 }

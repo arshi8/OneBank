@@ -15,7 +15,7 @@ export function getDefaultRouteForRole(role: UserRole | null): "/dashboard" | "/
   }
 
   if (role === "user") {
-    return "/my-projects";
+    return "/dashboard";
   }
 
   return "/";

@@ -36,13 +36,14 @@ import {
   CartesianGrid,
 } from "recharts";
 import { getStoredUserRole } from "@/lib/auth";
+import { useApplications, useServices, useProjects } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
     const role = getStoredUserRole();
 
-    if (role !== "admin") {
-      throw redirect({ to: role === "user" ? "/my-projects" : "/" });
+    if (!role) {
+      throw redirect({ to: "/" });
     }
   },
   head: () => ({
@@ -120,6 +121,13 @@ const savingsData = [
 ];
 
 function AdminDashboard({ displayName }: { displayName: string }) {
+  const [apps] = useApplications();
+  const [services] = useServices();
+
+  const totalApps = (176 + apps.length).toString();
+  const duplicatesCount = 1284 + (apps.length * 4);
+  const totalServices = services.length.toString();
+
   return (
     <>
       <PageHeader
@@ -133,9 +141,9 @@ function AdminDashboard({ displayName }: { displayName: string }) {
       />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-        <StatCard icon={AppWindow} label="Applications Onboarded" value="184" delta="+12 this week" tone="primary" />
-        <StatCard icon={Copy} label="Duplicate Modules Detected" value="1,284" delta="+98 this week" tone="rose" />
-        <StatCard icon={Package} label="Reusable Services Identified" value="41" delta="+5 this week" tone="success" />
+        <StatCard icon={AppWindow} label="Applications Onboarded" value={totalApps} delta="+12 this week" tone="primary" />
+        <StatCard icon={Copy} label="Duplicate Modules Detected" value={duplicatesCount.toLocaleString()} delta="+98 this week" tone="rose" />
+        <StatCard icon={Package} label="Reusable Services Identified" value={totalServices} delta="+5 this week" tone="success" />
         <StatCard icon={IndianRupee} label="Estimated Annual Savings" value="₹142 Cr" delta="+18 Cr this week" tone="warning" />
         <StatCard icon={Target} label="Modernization Progress" value="68%" delta="+6% this week" tone="info" />
       </div>
@@ -260,11 +268,45 @@ function AdminDashboard({ displayName }: { displayName: string }) {
 }
 
 function UserDashboard({ displayName }: { displayName: string }) {
+  const [projects] = useProjects();
+
+  const totalApps = projects.length.toString();
+  const duplicatesCount = projects.length * 4;
+  const totalServices = Math.floor(projects.length * 1.5).toString();
+  const userSavings = projects.length * 5;
+
+  // Derive graph data dynamically from projects length to make it reactive
+  const userDuplicateByCategory = [
+    { name: "Authentication", value: projects.length * 2, color: "var(--chart-1)" },
+    { name: "Customer", value: projects.length * 3, color: "var(--chart-2)" },
+    { name: "Reporting", value: projects.length * 1, color: "var(--chart-3)" },
+    { name: "Workflow", value: projects.length * 2, color: "var(--chart-4)" },
+    { name: "Notification", value: projects.length * 1, color: "var(--chart-5)" },
+  ];
+
+  const userProgressData = [
+    { m: "Jan", v: projects.length >= 1 ? 12 : 0 },
+    { m: "Feb", v: projects.length >= 2 ? 22 : 0 },
+    { m: "Mar", v: projects.length >= 3 ? 30 : 5 },
+    { m: "Apr", v: projects.length >= 4 ? 42 : 10 },
+    { m: "May", v: projects.length >= 5 ? 51 : 25 },
+    { m: "Jun", v: projects.length >= 6 ? 60 : 40 },
+    { m: "Jul", v: projects.length >= 7 ? 68 : Math.min(projects.length * 15, 100) },
+  ];
+
+  const userSavingsData = [
+    { y: "Year 1", v: userSavings * 0.2 },
+    { y: "Year 2", v: userSavings * 0.5 },
+    { y: "Year 3", v: userSavings * 1.0 },
+    { y: "Year 4", v: userSavings * 1.5 },
+    { y: "Year 5", v: userSavings * 2.0 },
+  ];
+
   return (
     <>
       <PageHeader
-        title="My Dashboard"
-        description={`Welcome back, ${displayName}. Overview of your projects and insights.`}
+        title="Project Dashboard"
+        description={`Welcome back, ${displayName}. Here's the analysis of your submitted projects.`}
         actions={
           <Button variant="outline" className="border-border">
             <Calendar className="mr-2 h-4 w-4" /> Last 30 Days
@@ -272,198 +314,131 @@ function UserDashboard({ displayName }: { displayName: string }) {
         }
       />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-        <Card className="border-border bg-card/50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/15">
-              <AppWindow className="h-5 w-5 text-purple-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold">3</p>
-              <p className="text-xs text-muted-foreground">Projects Analyzed</p>
-              <p className="text-xs text-success">↑ 2 this month</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-border bg-card/50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/15">
-              <Copy className="h-5 w-5 text-blue-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold">1,248</p>
-              <p className="text-xs text-muted-foreground">Modules Identified</p>
-              <p className="text-xs text-success">↑ 156 this month</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-border bg-card/50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/15">
-              <Package className="h-5 w-5 text-green-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold">32</p>
-              <p className="text-xs text-muted-foreground">Services Detected</p>
-              <p className="text-xs text-success">↑ 6 this month</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-border bg-card/50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/15">
-              <IndianRupee className="h-5 w-5 text-amber-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold">₹24.8</p>
-              <p className="text-xs text-muted-foreground">Potential Savings</p>
-              <p className="text-xs text-success">↑ 11% last month</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-border bg-card/50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/15">
-              <Target className="h-5 w-5 text-cyan-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold">68%</p>
-              <p className="text-xs text-muted-foreground">Modernization Score</p>
-              <p className="text-xs text-success">↑ 8% last month</p>
-            </div>
-          </div>
-        </Card>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+        <StatCard icon={AppWindow} label="Projects Analyzed" value={totalApps} delta={`+${projects.length} this month`} tone="primary" />
+        <StatCard icon={Copy} label="Duplicate Modules Detected" value={duplicatesCount.toLocaleString()} delta={`+${projects.length * 2} this month`} tone="rose" />
+        <StatCard icon={Package} label="Reusable Services Identified" value={totalServices} delta={`+${projects.length} this month`} tone="success" />
+        <StatCard icon={IndianRupee} label="Estimated Annual Savings" value={`₹${userSavings * 0.1} Cr`} delta={`+₹${Math.floor(userSavings * 0.1)} Cr`} tone="warning" />
+        <StatCard icon={Target} label="Modernization Progress" value={`${Math.min(projects.length * 15, 100)}%`} delta="+8% this month" tone="info" />
       </div>
 
-      {/* Recent Projects and Insights Summary */}
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="border-border bg-card p-6 shadow-card">
-            <h3 className="mb-4 text-sm font-semibold">Recent Projects</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="pb-3 text-left font-medium text-muted-foreground">Project Name</th>
-                    <th className="pb-3 text-left font-medium text-muted-foreground">Upload Date</th>
-                    <th className="pb-3 text-left font-medium text-muted-foreground">Status</th>
-                    <th className="pb-3 text-right font-medium text-muted-foreground">Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentProjects.map((project) => (
-                    <tr key={project.name} className="border-b border-border/50 hover:bg-card/50 transition-colors">
-                      <td className="py-4 flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15">
-                          <AppWindow className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium">{project.name}</p>
-                          <p className="text-xs text-muted-foreground">{project.version}</p>
-                        </div>
-                      </td>
-                      <td className="py-4 text-muted-foreground">{project.date}</td>
-                      <td className="py-4">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 px-2.5 py-0.5 text-xs text-green-600">
-                          <Check className="h-3 w-3" /> {project.status}
-                        </span>
-                      </td>
-                      <td className="py-4 text-right font-medium">{project.score}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* User Duplicates Pie Chart */}
+        <Card className="border-border bg-card p-5 shadow-card">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold">Duplicate Modules by Category</div>
+              <div className="text-xs text-muted-foreground">{duplicatesCount} total</div>
             </div>
-            <a href="/my-projects" className="mt-4 inline-flex items-center gap-1 text-xs text-primary hover:underline">
-              View all projects <ArrowRight className="h-3 w-3" />
-            </a>
-          </Card>
-        </div>
-
-        {/* Insights Summary */}
-        <Card className="border-border bg-card p-6 shadow-card">
-          <h3 className="mb-4 text-sm font-semibold">Insights Summary</h3>
-          <div className="flex justify-center mb-6">
-            <div className="relative h-48 w-48">
-              <ResponsiveContainer width={200} height={200}>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr] md:items-center">
+            <div className="h-56">
+              <ResponsiveContainer>
                 <PieChart>
                   <Pie
-                    data={insightsSummary}
-                    cx={100}
-                    cy={100}
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={2}
+                    data={userDuplicateByCategory}
                     dataKey="value"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={2}
                     stroke="none"
                   >
-                    {insightsSummary.map((d) => (
+                    {userDuplicateByCategory.map((d) => (
                       <Cell key={d.name} fill={d.color} />
                     ))}
                   </Pie>
+                  <Tooltip contentStyle={tooltipStyle} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <p className="text-lg font-bold">1,248</p>
-                <p className="text-xs text-muted-foreground">Total Modules</p>
-              </div>
             </div>
+            <ul className="space-y-2 text-sm">
+              {userDuplicateByCategory.map((d) => (
+                <li key={d.name} className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: d.color }} />
+                    <span className="text-foreground/90">{d.name}</span>
+                  </span>
+                  <span className="text-muted-foreground">{d.value}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-3 text-xs">
-            {insightsSummary.map((d) => (
-              <li key={d.name} className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: d.color }} />
-                <span className="text-muted-foreground">{d.name}</span>
-                <span className="ml-auto font-medium">{d.value} ({d.percentage}%)</span>
+          <a href="#" className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline">
+            View all Duplicates <ArrowRight className="h-3 w-3" />
+          </a>
+        </Card>
+
+        {/* User Progress Line Chart */}
+        <Card className="border-border bg-card p-5 shadow-card">
+          <div className="mb-2 flex items-center justify-between">
+            <div className="text-sm font-semibold">Modernization Progress</div>
+            <div className="text-lg font-semibold text-primary">{Math.min(projects.length * 15, 100)}%</div>
+          </div>
+          <div className="h-56">
+            <ResponsiveContainer>
+              <LineChart data={userProgressData}>
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="m" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Line
+                  type="monotone"
+                  dataKey="v"
+                  stroke="var(--primary)"
+                  strokeWidth={2.5}
+                  dot={{ fill: "var(--primary)", r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <a href="#" className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline">
+            View Roadmap <ArrowRight className="h-3 w-3" />
+          </a>
+        </Card>
+
+        {/* User Submitted Projects List */}
+        <Card className="border-border bg-card p-5 shadow-card">
+          <div className="mb-4 text-sm font-semibold">Recently Submitted Projects</div>
+          <ul className="space-y-3">
+            {projects.slice(0, 5).map((p, i) => (
+              <li key={p.name} className="flex items-center gap-3">
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 text-xs font-semibold text-primary">
+                  {i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium">{p.name}</span>
+                    <span className="text-xs text-muted-foreground">{p.status}</span>
+                  </div>
+                  <Progress value={p.score === "Pending" ? 30 : parseInt(p.score) || 100} className="mt-1.5 h-1.5" />
+                </div>
+                <span className="w-10 text-right text-xs font-medium text-success">{p.score === "Pending" ? "30%" : p.score}</span>
               </li>
             ))}
           </ul>
         </Card>
-      </div>
 
-      {/* Bottom Section */}
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Top Recommendations */}
-        <Card className="border-border bg-card p-6 shadow-card">
-          <h3 className="mb-4 text-sm font-semibold">Top Recommendations</h3>
-          <div className="space-y-3">
-            {topRecommendations.map((rec) => (
-              <div key={rec.number} className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
-                  {rec.number}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">{rec.title}</p>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 mt-1 text-xs text-amber-600">
-                    <AlertCircle className="h-3 w-3" /> {rec.impact}
-                  </span>
-                </div>
-              </div>
-            ))}
+        {/* User Savings Bar Chart */}
+        <Card className="border-border bg-card p-5 shadow-card">
+          <div className="mb-2 flex items-center justify-between">
+            <div className="text-sm font-semibold">Estimated Savings Over 5 Years</div>
+            <div className="rounded-md bg-primary/15 px-2 py-0.5 text-xs text-primary">Year 3 · ₹{userSavings} Cr</div>
           </div>
-        </Card>
-
-        {/* Estimated Savings */}
-        <Card className="border-border bg-card p-6 shadow-card">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Estimated Savings</h3>
-            <div className="text-2xl font-bold text-primary">₹24.8 Cr</div>
-          </div>
-          <p className="mb-4 text-xs text-muted-foreground">Potential Annual Savings</p>
-          <div className="h-32">
-            <ResponsiveContainer width="100%" height={128}>
-              <BarChart data={savingsData}>
-                <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} />
+          <div className="h-56">
+            <ResponsiveContainer>
+              <BarChart data={userSavingsData}>
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="y" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="amount" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="v" fill="var(--primary)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
+          <a href="/roi" className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline">
+            View ROI Details <ArrowRight className="h-3 w-3" />
+          </a>
         </Card>
       </div>
     </>
@@ -479,8 +454,8 @@ function DashboardPage() {
     const userRole = localStorage.getItem("userRole");
     const userName = localStorage.getItem("userName")?.trim();
 
-    if (userRole !== "admin") {
-      navigate({ to: userRole === "user" ? "/my-projects" : "/", replace: true });
+    if (!userRole) {
+      navigate({ to: "/", replace: true });
       return;
     }
 
