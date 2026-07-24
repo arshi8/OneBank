@@ -1,8 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
+import { getDefaultRouteForRole, getStoredUserRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/recommendations")({
+  beforeLoad: () => {
+    const role = getStoredUserRole();
+    throw redirect({ to: getDefaultRouteForRole(role) });
+  },
   head: () => ({
     meta: [
       { title: "Recommendations — OneBank Platform" },
