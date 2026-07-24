@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import loginVisual from "@/assets/login-visual.jpg";
+import { getDefaultRouteForRole } from "@/lib/auth";
 import authUsers from "../../auth-users.json";
 
 export const Route = createFileRoute("/")({
@@ -99,7 +100,7 @@ function LoginPage() {
     localStorage.setItem("userRole", loginType);
     localStorage.setItem("userId", userId.trim().toLowerCase());
     localStorage.setItem("userName", getSignedInUserName(loginType, userId));
-    navigate({ to: "/dashboard" });
+    navigate({ to: getDefaultRouteForRole(loginType) });
   };
 
   return (

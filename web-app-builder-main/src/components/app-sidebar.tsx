@@ -10,7 +10,6 @@ import {
   Settings,
   ChevronDown,
   Users,
-  Lock,
 } from "lucide-react";
 
 import {
@@ -24,6 +23,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { getDefaultRouteForRole, getStoredUserRole } from "@/lib/auth";
 import authUsers from "../../auth-users.json";
 
 type AuthUsers = {
@@ -41,8 +41,7 @@ type AuthUsers = {
 
 const credentials = authUsers as AuthUsers;
 
-const baseItems = [
-  { title: "My Dashboard", url: "/dashboard", icon: LayoutDashboard },
+const userItems = [
   { title: "Upload Project", url: "/upload-project", icon: Upload },
   { title: "My Projects", url: "/my-projects", icon: FolderOpen },
   { title: "AI Insights", url: "/ai-insights", icon: Sparkles },
@@ -52,8 +51,12 @@ const baseItems = [
 ];
 
 const adminItems = [
-  { title: "User Management", url: "/admin/users", icon: Users },
-  { title: "System Configuration", url: "/admin/config", icon: Lock },
+  { title: "My Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "All Applications", url: "/applications", icon: Users },
+  { title: "AI Insights", url: "/ai-insights", icon: Sparkles },
+  { title: "Architecture", url: "/architecture", icon: Network },
+  { title: "Recommendations", url: "/recommendations", icon: Lightbulb },
+  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -63,6 +66,7 @@ export function AppSidebar() {
   const [displayName, setDisplayName] = useState("User");
   const [displayRole, setDisplayRole] = useState("User");
   const [initials, setInitials] = useState("U");
+  const [homeUrl, setHomeUrl] = useState<"/" | "/dashboard" | "/my-projects">("/");
 
   const toInitials = (name: string) => {
     const parts = name
@@ -73,11 +77,12 @@ export function AppSidebar() {
   };
 
   useEffect(() => {
-    const userRole = localStorage.getItem("userRole");
+    const userRole = getStoredUserRole();
     const userId = localStorage.getItem("userId")?.toLowerCase() ?? "";
     const userName = localStorage.getItem("userName") ?? "";
 
     setIsAdmin(userRole === "admin");
+    setHomeUrl(getDefaultRouteForRole(userRole));
 
     if (userRole === "admin") {
       const name = userName || credentials.admin.userName;
@@ -94,12 +99,12 @@ export function AppSidebar() {
     setInitials(toInitials(name));
   }, []);
 
-  const items = isAdmin ? [...baseItems, ...adminItems] : baseItems;
+  const items = isAdmin ? adminItems : userItems;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
-        <Link to="/dashboard" className="flex items-center gap-2.5">
+        <Link to={homeUrl} className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
             <span className="text-sm font-bold text-primary-foreground">OB</span>
           </div>

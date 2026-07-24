@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   AppWindow,
   Copy,
@@ -34,8 +35,16 @@ import {
   Bar,
   CartesianGrid,
 } from "recharts";
+import { getStoredUserRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard")({
+  beforeLoad: () => {
+    const role = getStoredUserRole();
+
+    if (role !== "admin") {
+      throw redirect({ to: role === "user" ? "/my-projects" : "/" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Dashboard — OneBank Platform" },
@@ -110,12 +119,12 @@ const savingsData = [
   { month: "Jun", amount: 7 },
 ];
 
-function AdminDashboard() {
+function AdminDashboard({ displayName }: { displayName: string }) {
   return (
     <>
       <PageHeader
         title="Overview Dashboard"
-        description="Welcome back, Rajendra. Here's what's happening with your modernization journey."
+        description={`Welcome back, ${displayName}. Here's what's happening with your modernization journey.`}
         actions={
           <Button className="bg-gradient-primary shadow-glow">
             <Download className="mr-2 h-4 w-4" /> Download Report
@@ -250,12 +259,12 @@ function AdminDashboard() {
   );
 }
 
-function UserDashboard() {
+function UserDashboard({ displayName }: { displayName: string }) {
   return (
     <>
       <PageHeader
         title="My Dashboard"
-        description="Overview of your projects and insights"
+        description={`Welcome back, ${displayName}. Overview of your projects and insights.`}
         actions={
           <Button variant="outline" className="border-border">
             <Calendar className="mr-2 h-4 w-4" /> Last 30 Days
@@ -463,13 +472,25 @@ function UserDashboard() {
 
 function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [displayName, setDisplayName] = useState("User");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
-    setIsAdmin(userRole === "admin");
-  }, []);
+    const userName = localStorage.getItem("userName")?.trim();
 
-  return <AppShell>{isAdmin ? <AdminDashboard /> : <UserDashboard />}</AppShell>;
+    if (userRole !== "admin") {
+      navigate({ to: userRole === "user" ? "/my-projects" : "/", replace: true });
+      return;
+    }
+
+    setIsAdmin(userRole === "admin");
+    if (userName) {
+      setDisplayName(userName);
+    }
+  }, [navigate]);
+
+  return <AppShell>{isAdmin ? <AdminDashboard displayName={displayName} /> : <UserDashboard displayName={displayName} />}</AppShell>;
 }
 
 export const tooltipStyle = {

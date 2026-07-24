@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Plus, Filter, MoreHorizontal, Smartphone, Globe, Building2, Coins, CreditCard, Ship, Vault, Layers } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
@@ -14,8 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getStoredUserRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/applications")({
+  beforeLoad: () => {
+    const role = getStoredUserRole();
+
+    if (role !== "admin") {
+      throw redirect({ to: role === "user" ? "/my-projects" : "/" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Applications — OneBank Platform" },
